@@ -106,18 +106,26 @@ class EdgarClient:
     def format_cik(cik):
         return str(int(cik)).zfill(10)
 
-    def get_json(self, url, params=None):
+    def _get(self, url, params=None):
         self.bucket.acquire()
         cache_key = url
         if params:
             cache_key = url + "?" + urlencode(sorted(params.items()))
         cached = self.cache.get(cache_key)
         if cached is not None:
-            return json.loads(cached["content"])
+            return cached["status_code"], cached["content"]
         resp = self.session.get(url, params=params, headers=self._headers())
         resp.raise_for_status()
         self.cache.put(cache_key, resp.status_code, resp.text, resp.headers.get("Content-Type"))
-        return resp.json()
+        return resp.status_code, resp.text
+
+    def get_json(self, url, params=None):
+        _, content = self._get(url, params)
+        return json.loads(content)
+
+    def get_text(self, url, params=None):
+        _, content = self._get(url, params)
+        return content
 
     def resolve_ticker(self, ticker):
         data = self.get_json(self.COMPANY_TICKERS_URL)
