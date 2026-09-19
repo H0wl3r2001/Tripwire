@@ -29,6 +29,7 @@ VECTOR_SIZE = 768
 CHUNK_SIZE = 800
 DENSE_VECTOR = "dense"
 SPARSE_VECTOR = "sparse"
+K1, B, AVG_DL = 1.2, 0.75, 120
 
 TOKEN_RE = re.compile(r"[a-z0-9]{2,}")
 
@@ -117,11 +118,16 @@ def _term_counts(text):
     return counts
 
 
-def to_sparse_vector(text):
+def to_sparse_vector(text, is_query=False):
     counts = _term_counts(text)
-    indices = sorted(counts)
-    return SparseVector(indices=indices, values=[float(counts[i]) for i in indices])
-
+    dl = sum(counts.values())
+    if is_query:
+        weights = {i: 1.0 for i in counts}
+    else:
+        weights = {i: tf * (K1 + 1) / (tf + K1 * (1 - B + B * dl / AVG_DL))
+                   for i, tf in counts.items()}
+    indices = sorted(weights)
+    return SparseVector(indices=indices, values=[weights[i] for i in indices])
 
 def archive_url(cik, accession_number, filename):
     cik_int = str(int(cik))
@@ -287,7 +293,7 @@ def hybrid_retrieve(qdrant, query, ticker=None, top_k=5, candidates_per=20):
         collection_name=COLLECTION,
         prefetch=[
             Prefetch(query=query_vector, using=DENSE_VECTOR, limit=candidates_per),
-            Prefetch(query=to_sparse_vector(query), using=SPARSE_VECTOR, limit=candidates_per),
+            Prefetch(query=to_sparse_vector(query, is_query=True), using=SPARSE_VECTOR, limit=candidates_per),
         ],
         query=FusionQuery(fusion=Fusion.RRF),
         query_filter=_ticker_filter(ticker),
