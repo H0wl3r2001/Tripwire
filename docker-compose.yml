@@ -1,0 +1,47 @@
+services:
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: tripwire_qdrant
+    ports:
+      - "6333:6333"
+    volumes:
+      - qdrant_data:/qdrant/storage
+    restart: unless-stopped
+
+  # CPU-only by design: AMD GPU passthrough (Vulkan/ROCm) into a WSL2 Docker
+  # container is unreliable as of mid-2026 (missing /dev/dri, driver mismatches,
+  # ERROR_INCOMPATIBLE_DRIVER). Do not add a `deploy.resources.reservations.devices`
+  # GPU block here without re-validating passthrough works first — see
+  # TRIPWIRE_PROJECT_BRIEF.md section 4.
+  ollama:
+    image: ollama/ollama:latest
+    container_name: tripwire_ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    restart: unless-stopped
+
+  app:
+    build: ./app
+    container_name: tripwire_app
+    env_file:
+      - .env
+    environment:
+      OLLAMA_MODEL_SMALL: ${OLLAMA_MODEL_SMALL:-qwen2.5:3b}
+      OLLAMA_MODEL_LARGE: ${OLLAMA_MODEL_LARGE:-qwen2.5:7b}
+      OLLAMA_HOST: ${OLLAMA_HOST:-http://ollama:11434}
+      QDRANT_HOST: ${QDRANT_HOST:-qdrant}
+      QDRANT_PORT: ${QDRANT_PORT:-6333}
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./app:/app
+    depends_on:
+      - qdrant
+      - ollama
+    restart: unless-stopped
+
+volumes:
+  ollama_data:
+  qdrant_data:

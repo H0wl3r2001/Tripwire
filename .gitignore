@@ -1,0 +1,10 @@
+# Secrets / local config
+.env
+
+# Generated artifacts (EDGAR cache, trace logs, eval results)
+*.db
+*.sqlite3
+
+# Python
+__pycache__/
+*.pyc
