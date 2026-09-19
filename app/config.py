@@ -7,3 +7,5 @@ OLLAMA_MODEL_LARGE = os.getenv("OLLAMA_MODEL_LARGE", "qwen2.5:7b")
 OLLAMA_HOST = os.getenv("OLLAMA_HOST", "http://ollama:11434")
 QDRANT_HOST = os.getenv("QDRANT_HOST", "qdrant")
 QDRANT_PORT = int(os.getenv("QDRANT_PORT", "6333"))
+
+CACHE_DB_PATH = os.getenv("CACHE_DB_PATH", "edgar_cache.sqlite3")
