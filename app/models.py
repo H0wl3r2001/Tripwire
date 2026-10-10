@@ -15,6 +15,7 @@ class TradeFinding(BaseModel):
     cik: str
     disclosure_date: str | None = None
     lookback_days: int
+    form4_count: int = 0
     transactions: list[Transaction] = []
     in_window: bool = False
     summary: str = ""
@@ -26,3 +27,14 @@ class FilingAnalysis(BaseModel):
     form_type: str = "8-K"
     summary: str = ""
     citations: list[str] = []
+
+
+class Report(BaseModel):
+    ticker: str
+    verdict: str
+    disclosure_date: str | None = None
+    lookback_days: int
+    sales: list[Transaction] = []
+    filing_summary: str = ""
+    citations: list[str] = []
+    validation_issues: list[str] = []

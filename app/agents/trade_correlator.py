@@ -101,6 +101,7 @@ def correlate(edgar, ticker, lookback_days=30):
         cik=cik,
         disclosure_date=disclosure_date,
         lookback_days=lookback_days,
+        form4_count=sum(1 for f in forms if f == "4"),
         transactions=transactions,
         in_window=in_window,
     )
