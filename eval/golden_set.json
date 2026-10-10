@@ -1,0 +1,29 @@
+{
+  "_comment": "Golden set for Tripwire eval. Each case must be hand-verified against EDGAR before trusting any eval numbers. expected_verdict is one of: flagged | not flagged | insufficient data. expected_accession is the 8-K accession number that retrieval should surface (used for retrieval hit-rate).",
+  "cases": [
+    {
+      "id": "example-001",
+      "ticker": "AAPL",
+      "lookback_days": 30,
+      "expected_verdict": "not flagged",
+      "expected_accession": "0000000000-00-000000",
+      "note": "PLACEHOLDER — replace with a hand-verified case"
+    },
+    {
+      "id": "example-002",
+      "ticker": "AAPL",
+      "lookback_days": 60,
+      "expected_verdict": "flagged",
+      "expected_accession": "0000000000-00-000000",
+      "note": "PLACEHOLDER — replace with a hand-verified case"
+    },
+    {
+      "id": "example-003",
+      "ticker": "MSFT",
+      "lookback_days": 30,
+      "expected_verdict": "insufficient data",
+      "expected_accession": "0000000000-00-000000",
+      "note": "PLACEHOLDER — replace with a hand-verified case"
+    }
+  ]
+}

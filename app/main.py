@@ -1,9 +1,22 @@
 import httpx
 from fastapi import FastAPI
+from pydantic import BaseModel
 
 from config import OLLAMA_HOST, QDRANT_HOST, QDRANT_PORT
+from edgar_client import EdgarClient
+from graph import investigate as run_investigation
+from ingest import ensure_collection, get_qdrant
 
 app = FastAPI(title="Tripwire")
+
+edgar = EdgarClient()
+qdrant = get_qdrant()
+ensure_collection(qdrant)
+
+
+class InvestigateRequest(BaseModel):
+    ticker: str
+    lookback_days: int = 30
 
 
 @app.get("/health")
@@ -34,6 +47,7 @@ async def health():
     return {"status": "ok" if all_ok else "degraded", "dependencies": dependencies}
 
 
-@app.get("/investigate")
-async def investigate():
-    return {"status": "not_implemented"}
+@app.post("/investigate")
+def investigate(req: InvestigateRequest):
+    report = run_investigation(edgar, qdrant, req.ticker, req.lookback_days)
+    return report
