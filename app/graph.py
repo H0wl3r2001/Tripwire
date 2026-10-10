@@ -17,6 +17,8 @@ class State(TypedDict, total=False):
     report: Report
     validation_issues: list[str]
     regeneration_count: int
+    trade_model: str
+    filing_model: str
 
 
 def _report_text(trade, filing):
@@ -43,12 +45,12 @@ def build_graph(edgar, qdrant, form4_threshold=5):
         return {}
 
     def trade_node(state):
-        finding, _ = run_trade(edgar, state["ticker"], state["lookback_days"])
-        return {"trade_finding": finding}
+        finding, model = run_trade(edgar, state["ticker"], state["lookback_days"])
+        return {"trade_finding": finding, "trade_model": model}
 
     def filing_node(state):
         chunks = retrieve_chunks(qdrant, state["ticker"], "material disclosure", top_k=5)
-        summary, _ = summarize_chunks(state["ticker"], chunks)
+        summary, model = summarize_chunks(state["ticker"], chunks)
         analysis = FilingAnalysis(
             ticker=state["ticker"],
             accession_number=chunks[0]["accession_number"] if chunks else None,
@@ -56,7 +58,7 @@ def build_graph(edgar, qdrant, form4_threshold=5):
             summary=summary,
             citations=sorted({c["accession_number"] for c in chunks}),
         )
-        return {"filing_analysis": analysis, "chunks": chunks}
+        return {"filing_analysis": analysis, "chunks": chunks, "filing_model": model}
 
     def validate_node(state):
         trade = state["trade_finding"]
@@ -94,6 +96,8 @@ def build_graph(edgar, qdrant, form4_threshold=5):
             filing_summary=filing.summary,
             citations=filing.citations,
             validation_issues=state["validation_issues"],
+            trade_model=state.get("trade_model", ""),
+            filing_model=state.get("filing_model", ""),
         )
         return {"report": report}
 

@@ -38,3 +38,5 @@ class Report(BaseModel):
     filing_summary: str = ""
     citations: list[str] = []
     validation_issues: list[str] = []
+    trade_model: str = ""
+    filing_model: str = ""
