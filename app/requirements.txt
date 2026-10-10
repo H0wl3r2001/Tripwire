@@ -2,3 +2,4 @@ fastapi==0.115.6
 uvicorn[standard]==0.34.0
 httpx==0.28.1
 qdrant-client==1.12.1
+langgraph==0.2.60
