@@ -114,8 +114,17 @@ class EdgarClient:
         cached = self.cache.get(cache_key)
         if cached is not None:
             return cached["status_code"], cached["content"]
-        resp = self.session.get(url, params=params, headers=self._headers())
-        resp.raise_for_status()
+        last_exc = None
+        for attempt in range(3):
+            try:
+                resp = self.session.get(url, params=params, headers=self._headers())
+                resp.raise_for_status()
+                break
+            except httpx.HTTPStatusError as exc:
+                last_exc = exc
+                time.sleep(1.0 * (attempt + 1))
+        else:
+            raise last_exc
         self.cache.put(cache_key, resp.status_code, resp.text, resp.headers.get("Content-Type"))
         return resp.status_code, resp.text
 
