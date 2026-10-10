@@ -187,7 +187,7 @@ Response (a `Report`):
 
 ## Evaluation
 
-`eval/golden_set.json` holds hand-verified `(ticker, lookback_days, expected_verdict, expected_accession)` cases. `eval/eval.py` calls `/investigate` for each and reports four numbers:
+`eval/golden_set.json` still needs to hold hand-verified `(ticker, lookback_days, expected_verdict, expected_accession)` cases. `eval/eval.py` calls `/investigate` for each and reports four numbers:
 
 - **correlation-flag accuracy** — verdict vs. ground truth.
 - **retrieval hit-rate** — did the right 8-K accession get retrieved.
